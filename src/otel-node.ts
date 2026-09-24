@@ -16,8 +16,12 @@
 
 
 
+import { createRequire } from 'node:module';
 import { trace } from '@opentelemetry/api';
 import { getOtelConfig } from './config.js';
+import { isIsolatedTelemetryRequest, setIsolatedTelemetryWiring } from './services/isolated-telemetry-fetch.js';
+
+const require = createRequire(import.meta.url);
 
 
 
@@ -120,6 +124,7 @@ export function initializeServerTracing(): unknown {
 	if (sdk) {
 		return sdk;
 	}
+	setIsolatedTelemetryWiring(null);
 
 	const config = getOtelConfig();
 	const serviceName = getServiceName();
@@ -142,9 +147,10 @@ export function initializeServerTracing(): unknown {
 		console.log(`[OTel] Tempo base endpoint: ${otlpEndpoint}`);
 
 		
-		const { NodeSDK } = require('@opentelemetry/sdk-node');
+		const { NodeSDK, core } = require('@opentelemetry/sdk-node');
 
 		const sdkOptions: Record<string, unknown> = {};
+		let isolatedHooksReady = () => false;
 
 		
 		try {
@@ -153,23 +159,35 @@ export function initializeServerTracing(): unknown {
 				'/health', '/favicon', '/_app/', '.js', '.css'
 			];
 
-			sdkOptions.instrumentations = [
-				getNodeAutoInstrumentations({
+			const instrumentations = getNodeAutoInstrumentations({
 					'@opentelemetry/instrumentation-fs': { enabled: false },
 					'@opentelemetry/instrumentation-http': {
+						ignoreOutgoingRequestHook: isIsolatedTelemetryRequest,
 						ignoreIncomingRequestHook: (request: { url?: string }) => {
 							const url = request.url || '';
 							return ignorePatterns.some(p => url.includes(p));
 						}
-					}
-				})
-			];
+					},
+					'@opentelemetry/instrumentation-undici': {
+						ignoreRequestHook: isIsolatedTelemetryRequest,
+					},
+				});
+			const http = instrumentations.find((item: { instrumentationName: string }) =>
+				item.instrumentationName === '@opentelemetry/instrumentation-http');
+			const undici = instrumentations.find((item: { instrumentationName: string }) =>
+				item.instrumentationName === '@opentelemetry/instrumentation-undici');
+			isolatedHooksReady = () => Boolean(http && undici &&
+				http.getConfig().ignoreOutgoingRequestHook === isIsolatedTelemetryRequest &&
+				undici.getConfig().ignoreRequestHook === isIsolatedTelemetryRequest &&
+				http.isEnabled() && undici.isEnabled());
+			sdkOptions.instrumentations = [instrumentations];
 		} catch {
 			console.log('[OTel] Auto-instrumentations not available, using manual instrumentation only');
 		}
 
 		sdk = new NodeSDK(sdkOptions);
 		(sdk as { start: () => void }).start();
+		if (isolatedHooksReady()) setIsolatedTelemetryWiring(core, isolatedHooksReady);
 
 		console.log('[OTel] Server-side tracing initialized successfully');
 
@@ -178,6 +196,7 @@ export function initializeServerTracing(): unknown {
 
 		return sdk;
 	} catch (error) {
+		setIsolatedTelemetryWiring(null);
 		console.error('[OTel] Failed to initialize server-side tracing:', error);
 		console.error('[OTel] Falling back to NoopTracer (no traces will be exported)');
 
@@ -200,6 +219,7 @@ export function initializeServerTracing(): unknown {
 
 
 export async function shutdownServerTracing(): Promise<void> {
+	setIsolatedTelemetryWiring(null);
 	if (!sdk || typeof (sdk as Record<string, unknown>).shutdown !== 'function') {
 		return;
 	}
