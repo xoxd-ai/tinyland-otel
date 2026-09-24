@@ -181,6 +181,7 @@ export { TempoQueryService, createTempoQueryService } from './services/tempo-que
 // Additive, explicit server transport. No SDK initialization or ambient config.
 export { TelemetryTransportError } from './services/bounded-http.js';
 export type { BoundedFetch, TelemetryTransportCode, SpanScalar } from './services/bounded-http.js';
+export { createIsolatedTelemetryFetch } from './services/isolated-telemetry-fetch.js';
 export { createServerSpanTransport } from './services/server-span-transport.js';
 export type { ServerSpanTransport, ServerSpanTransportOptions, ServerSpanInput } from './services/server-span-transport.js';
 export { createBoundedTempoReader } from './services/bounded-tempo-query.js';
