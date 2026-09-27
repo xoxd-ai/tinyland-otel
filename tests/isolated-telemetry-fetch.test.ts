@@ -1,5 +1,5 @@
-import { createServer, request as httpRequest } from 'node:http';
 import { once } from 'node:events';
+import { createRequire } from 'node:module';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { context, propagation, trace, ROOT_CONTEXT } from '@opentelemetry/api';
 import { NodeSDK, core, metrics, tracing } from '@opentelemetry/sdk-node';
@@ -60,16 +60,7 @@ describe('opt-in telemetry fetch isolation (configured HTTP/Undici instrumentati
 
   it('skips marked request hooks, spans, propagation and metrics while ordinary fetch remains instrumented', async () => {
     const observed: Array<Record<string, string | string[] | undefined>> = [];
-    const server = createServer((request, response) => {
-      observed.push(request.headers as Record<string, string | string[] | undefined>);
-      response.writeHead(200, { 'content-type': 'application/json' });
-      response.end('{}');
-    });
-    server.listen(0, '127.0.0.1');
-    await once(server, 'listening');
-    const address = server.address();
-    if (!address || typeof address === 'string') throw new Error('missing loopback port');
-    const url = `http://127.0.0.1:${address.port}/v1/traces`;
+    let server: ReturnType<typeof import('node:http').createServer> | undefined;
 
     const spans = new tracing.InMemorySpanExporter();
     const metricExport = new metrics.InMemoryMetricExporter(metrics.AggregationTemporality.DELTA);
@@ -115,6 +106,19 @@ describe('opt-in telemetry fetch isolation (configured HTTP/Undici instrumentati
     });
     try {
       sdk.start();
+      // Resolve the builtin after HTTP instrumentation is enabled. A static
+      // named import captures the pre-patch request function in this fixture.
+      const httpModule = createRequire(import.meta.url)('http') as typeof import('node:http');
+      server = httpModule.createServer((request, response) => {
+        observed.push(request.headers as Record<string, string | string[] | undefined>);
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end('{}');
+      });
+      server.listen(0, '127.0.0.1');
+      await once(server, 'listening');
+      const address = server.address();
+      if (!address || typeof address === 'string') throw new Error('missing loopback port');
+      const url = `http://127.0.0.1:${address.port}/v1/traces`;
       expect(hooksReady()).toBe(true);
       setIsolatedTelemetryWiring(core, hooksReady);
       const isolated = createIsolatedTelemetryFetch();
@@ -160,7 +164,7 @@ describe('opt-in telemetry fetch isolation (configured HTTP/Undici instrumentati
       // the separately configured HTTP ignore hook, not arbitrary fetch patches.
       const priorFetch = globalThis.fetch;
       globalThis.fetch = ((target: string, request: RequestInit) => new Promise<Response>((resolve, reject) => {
-        const outgoing = httpRequest(target, { method: request.method, headers: request.headers as Record<string, string> },
+        const outgoing = httpModule.request(target, { method: request.method, headers: request.headers as Record<string, string> },
           (incoming) => {
             incoming.resume();
             incoming.on('end', () => resolve(new Response('{}', { status: incoming.statusCode })));
@@ -207,9 +211,17 @@ describe('opt-in telemetry fetch isolation (configured HTTP/Undici instrumentati
       undici!.setConfig(priorUndiciConfig);
     } finally {
       setIsolatedTelemetryWiring(null);
-      await sdk.shutdown();
-      server.close();
-      await once(server, 'close');
+      try {
+        await sdk.shutdown();
+      } finally {
+        const activeServer = server;
+        if (activeServer) {
+          await new Promise<void>((resolve, reject) => activeServer.close((error) => {
+            if (!error || (error as NodeJS.ErrnoException).code === 'ERR_SERVER_NOT_RUNNING') resolve();
+            else reject(error);
+          }));
+        }
+      }
     }
   });
 });
