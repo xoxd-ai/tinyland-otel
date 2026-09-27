@@ -25,7 +25,8 @@ describe('explicit server OTLP transport (synthetic fetch only)', () => {
     expect(fetcher).toHaveBeenCalledTimes(1);
     const [url, request] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('https://collector.invalid/v1/traces');
-    expect(request).toMatchObject({ method: 'POST', redirect: 'manual', credentials: 'omit', cache: 'no-store' });
+    expect(request).toMatchObject({ method: 'POST', redirect: 'manual', credentials: 'omit',
+      cache: 'no-store', referrerPolicy: 'no-referrer' });
     expect(request.headers).toEqual({ Accept: 'application/json', 'Content-Type': 'application/json' });
     const wire = JSON.parse(request.body as string);
     expect(wire.resourceSpans[0].resource.attributes).toEqual([{ key: 'service.name', value: { stringValue: 'test-app' } }]);

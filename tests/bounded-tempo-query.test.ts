@@ -50,7 +50,10 @@ describe('bounded exact-match Tempo reader (no collector traffic)', () => {
     const calls = fetcher.mock.calls as unknown as Array<[string, RequestInit]>;
     expect(new URL(calls[0][0]).searchParams.get('q')).toBe('{ span:name = "session.observed" && span.evidence.binding = "opaque" }');
     expect(calls[1][0]).toBe(`https://tempo.invalid/api/v2/traces/${TRACE}?start=1780000000&end=1780000600`);
-    expect(calls.every(([, init]) => init.redirect === 'manual' && init.credentials === 'omit')).toBe(true);
+    for (const [, init] of calls) {
+      expect(init).toMatchObject({ redirect: 'manual', credentials: 'omit',
+        cache: 'no-store', referrerPolicy: 'no-referrer' });
+    }
   });
 
   it('supports a complete export-to-Tempo-shaped read fixture without global SDK state', async () => {

@@ -6,7 +6,7 @@
  * This does not claim to isolate arbitrary third-party fetch wrappers.
  */
 import { ROOT_CONTEXT, context, createContextKey } from '@opentelemetry/api';
-import { TelemetryTransportError, type BoundedFetch } from './bounded-http.js';
+import { TelemetryTransportError, type BoundedFetch, type BoundedRequestInit } from './bounded-http.js';
 
 type TracingCore = {
   suppressTracing: (value: typeof ROOT_CONTEXT) => typeof ROOT_CONTEXT;
@@ -96,7 +96,7 @@ export function createIsolatedTelemetryFetch(): BoundedFetch {
       throw new TelemetryTransportError('INVALID_INPUT');
     }
     // Pass only reviewed fields even if the caller later extends its object.
-    const safeInit: RequestInit = {
+    const safeInit: BoundedRequestInit = {
       method: approved.method, body: approved.body, signal: approved.signal,
       headers: { Accept: 'application/json',
         ...(approved.method === 'POST' ? { 'Content-Type': 'application/json' } : {}) },
