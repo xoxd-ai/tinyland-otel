@@ -1,2 +1,9 @@
 onlyBuiltDependencies:
   - esbuild
+
+# exporter-prometheus@0.209.0 imports semantic-conventions from
+# PrometheusSerializer but omits it from its published dependencies.
+packageExtensions:
+  '@opentelemetry/exporter-prometheus@0.209.0':
+    dependencies:
+      '@opentelemetry/semantic-conventions': 1.40.0
