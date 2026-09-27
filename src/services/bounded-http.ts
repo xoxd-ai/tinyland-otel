@@ -2,6 +2,14 @@
 import { performance } from 'node:perf_hooks';
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
 
+/** Fetch options fixed by this transport, including fields absent from Node's RequestInit. */
+export type BoundedRequestInit = RequestInit & {
+  redirect: 'manual';
+  credentials: 'omit';
+  cache: 'no-store';
+  referrerPolicy: 'no-referrer';
+};
+
 /** Caller-admitted transport; must honor redirect/abort and must not add instrumentation. */
 export type BoundedFetch = (url: string, init: RequestInit) => Promise<Response>;
 export type TelemetryTransportCode = 'INVALID_INPUT' | 'ABORTED' | 'TIMEOUT' |
@@ -109,12 +117,13 @@ export class BoundedHttpOperation {
     let response: Response | undefined;
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     try {
-      response = await this.wait(() => this.fetcher(url, {
+      const init: BoundedRequestInit = {
         method: body === undefined ? 'GET' : 'POST', body,
         headers: { Accept: 'application/json', ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
         signal: this.controller.signal, redirect: 'manual', credentials: 'omit',
         cache: 'no-store', referrerPolicy: 'no-referrer',
-      }), cancelResponse);
+      };
+      response = await this.wait(() => this.fetcher(url, init), cancelResponse);
       if (response.redirected || (response.status >= 300 && response.status < 400)) throw new TelemetryTransportError('REDIRECT');
       if (response.status !== 200) throw new TelemetryTransportError('HTTP');
       if (response.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') malformed();
