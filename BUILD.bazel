@@ -58,7 +58,7 @@ npm_package(
         ":tinyland_otel",
     ],
     package = "@tummycrypt/tinyland-otel",
-    version = "0.2.3",
+    version = "0.3.0",
     visibility = ["//visibility:public"],
 )
 
@@ -73,6 +73,10 @@ vitest_bin.vitest_test(
         "tsconfig.json",
         ":node_modules/vitest",
         "vitest.config.ts",
+        # Read by tests/package-authority.test.ts (version-parity guard).
+        "//:MODULE.bazel",
+        "BUILD.bazel",
+        "package.json",
     ] + glob(["src/**/*.ts"]) + glob(["tests/**/*.test.ts", "tests/**/*.ts"]),
     args = [
         "run",
