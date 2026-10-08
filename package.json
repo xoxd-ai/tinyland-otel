@@ -1,6 +1,6 @@
 {
   "name": "@tummycrypt/tinyland-otel",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "OpenTelemetry instrumentation layer: tracer factory, span helpers, TraceQL query builder, RED metrics, Tempo query service, and file-based observability logging",
   "type": "module",
   "main": "./dist/index.js",
@@ -20,7 +20,6 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "prepublishOnly": "pnpm build && pnpm check:package",
     "test": "vitest run",
     "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit",
@@ -70,10 +69,6 @@
   },
   "engines": {
     "node": ">=22.0.0"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
   },
   "packageManager": "pnpm@10.13.1",
   "homepage": "https://github.com/tinyland-inc/tinyland-otel",

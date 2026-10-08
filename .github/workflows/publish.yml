@@ -12,8 +12,7 @@ on:
 permissions:
   actions: read
   contents: read
-  id-token: write
-  packages: write
+  packages: read
 jobs:
   package:
     uses: xoxd-ai/ci-templates/.github/workflows/js-bazel-package.yml@v2.14.1
@@ -34,5 +33,8 @@ jobs:
       npm_access: public
       npm_publish_mode: disabled
       dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
-    secrets:
-      TINYLAND_GITHUB_PACKAGES_TOKEN: ${{ secrets.TINYLAND_GITHUB_PACKAGES_TOKEN }}
+    # Validation only (RU6, RU8). npm_publish_mode is disabled and no GitHub
+    # Packages name is set (GP2), so the reusable workflow skips both publish
+    # jobs. No publish permissions or secrets are granted. Releases ship as a
+    # signed git tag, a GitHub release and an append-only xoxd-ai/bazel-registry
+    # entry (module tummycrypt_tinyland_otel); consumers use bazel_dep.
