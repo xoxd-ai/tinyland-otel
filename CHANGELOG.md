@@ -13,8 +13,15 @@
   `BoundedTempoSpan` and `BoundedTempoResult`. Ported from the
   `candidate/otel-prometheus-edge-20260927` lineage (dcb7a9e9da, ce3bef0d38,
   6ac6eba354, 5e3e538423, cafa596d83) that the Mothership writer was built from.
-- `otel-node` binds the HTTP control after instrumentation starts and declares
-  the Prometheus exporter semantic-conventions edge.
+- `otel-node` loads the SDK through `createRequire`. In 0.2.3 it called a bare
+  `require` inside this ESM package, so in a plain ESM runtime (no bundler
+  `require` shim) `initializeServerTracing()` threw, logged a failure and fell
+  back to the NoopTracer. From 0.3.0 it starts the
+  NodeSDK when `@opentelemetry/sdk-node` is installed, and it excludes isolated
+  telemetry requests from the HTTP and undici auto-instrumentation. Consumers
+  that called it without exporting traces will now export them.
+- The Prometheus exporter to semantic-conventions dependency edge is declared in
+  `pnpm-workspace.yaml`.
 - No existing export changed or was removed. Peer and runtime stack unchanged.
 
 ### Distribution
