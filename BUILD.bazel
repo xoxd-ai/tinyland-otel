@@ -73,6 +73,10 @@ vitest_bin.vitest_test(
         "tsconfig.json",
         ":node_modules/vitest",
         "vitest.config.ts",
+        # Read by tests/package-authority.test.ts (version-parity guard).
+        "//:MODULE.bazel",
+        "BUILD.bazel",
+        "package.json",
     ] + glob(["src/**/*.ts"]) + glob(["tests/**/*.test.ts", "tests/**/*.ts"]),
     args = [
         "run",
