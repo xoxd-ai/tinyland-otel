@@ -169,6 +169,10 @@ describe('bounded exact-match Tempo reader (no collector traffic)', () => {
 
   it('shares the deadline across search and concurrent fetches, not per request', async () => {
     vi.useFakeTimers();
+    // The operation also guards its deadline with performance.now(). Drive that
+    // clock from the fake one, so a loaded host cannot expire the 30 ms budget
+    // in real time before the fake timers advance.
+    vi.spyOn(performance, 'now').mockImplementation(() => Date.now());
     const fetcher = vi.fn(async (url: string, _init: RequestInit) => {
       if (url.includes('/api/search?')) {
         await new Promise((resolve) => setTimeout(resolve, 20));

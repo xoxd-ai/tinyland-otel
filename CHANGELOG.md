@@ -1,5 +1,48 @@
 # @tummycrypt/tinyland-otel
 
+## 1.0.0
+
+### Major Changes
+
+- The toolchain moves to the estate RU1 stack. The source and the public API are
+  unchanged from 0.3.0: no export was added, removed or renamed.
+  - TypeScript 7.0.2 (the native compiler) is the `typescript` package, pinned
+    exact. Bazel builds with it through `aspect_rules_ts` 3.10.1, whose
+    `typescript` extension reads the version from `package.json` (`version_from`).
+  - vitest and `@vitest/coverage-v8` 5.0.3, pinned exact.
+  - Node 22.22.0 is the Bazel toolchain and `engines.node` is `>=22.17.0`.
+  - `tsconfig.json` lists `"types": ["node"]`, because TypeScript 6 and 7 no
+    longer load every `@types/*` package by default.
+- The optional peer ranges now accept the versions consumers actually run:
+  `@opentelemetry/sdk-node` `>=0.209.0 <1.0.0`,
+  `@opentelemetry/auto-instrumentations-node` `>=0.67.0 <1.0.0`,
+  `@pyroscope/nodejs` `>=0.4.0 <1.0.0`, and `@opentelemetry/api` `^1.9.1`.
+  The old ranges (`^0.209.0`, `^0.67.0`, `^0.4.0`) excluded the versions that
+  tinyland.dev installs (0.221.x, 0.79.x and 0.6.x).
+- The `@opentelemetry/exporter-prometheus@0.209.0` package extension is removed.
+  The lock now resolves 0.223.0, which declares its semantic-conventions
+  dependency itself. `tests/prometheus-dependency-edge.test.ts` still guards
+  that edge.
+- `package.json` is `"private": true`, and the validation-only `publish.yml`
+  workflow is deleted (RU8). Bazel is the only distribution path (RU6).
+
+### Migration
+
+- Bazel consumers: use `bazel_dep(name = "tummycrypt_tinyland_otel", version = "1.0.0")`
+  from xoxd-ai/bazel-registry. The module now depends on `aspect_rules_ts`
+  3.10.1, so module resolution raises a consumer's `aspect_rules_ts` to at
+  least 3.10.1.
+- The root module's TypeScript pin still wins. A root that registers
+  `npm_typescript` (through `typescript.deps`, or the deprecated `ext.deps`)
+  compiles this module's `:pkg` target with its own TypeScript version.
+- If a consumer root registers no TypeScript version and also depends on
+  another module with a different non-root pin, the build now fails with the
+  rules_ts error "Multiple non-root modules specify different versions". To
+  fix it, pin TypeScript in the root module (the estate target is 7.0.2).
+- Consumers on a Node version below 22.17 must upgrade Node.
+- No source change is needed: every import that works against 0.3.0 also works
+  against 1.0.0.
+
 ## 0.3.0
 
 ### Minor Changes
