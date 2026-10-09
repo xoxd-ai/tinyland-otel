@@ -217,3 +217,25 @@ export {
 	getQueriesByUser,
 	updateQuery,
 } from './persistence/saved-queries.js';
+
+
+// Loki-backed analytics data reader, merged from the retired
+// tummycrypt_tinyland_analytics_data module. The full, unchanged API lives at
+// the "./analytics-data" subpath (@tummycrypt/tinyland-otel/analytics-data).
+// These root aliases avoid clashing with the otel configure/Logger names.
+export {
+	configure as configureAnalyticsData,
+	getConfig as getAnalyticsDataConfig,
+	resetConfig as resetAnalyticsDataConfig,
+	parseTimeRange as parseAnalyticsTimeRange,
+	AnalyticsDataService,
+	analyticsDataService,
+	createAnalyticsDataService,
+} from './analytics-data/index.js';
+export type {
+	PageView as AnalyticsPageView,
+	AnalyticsMetrics,
+	AnalyticsDataConfig,
+	Logger as AnalyticsDataLogger,
+	FetchResponse as AnalyticsFetchResponse,
+} from './analytics-data/index.js';
