@@ -1,5 +1,37 @@
 # @tummycrypt/tinyland-otel
 
+## 1.4.0
+
+### Minor Changes
+
+- Merge the retired `tummycrypt_tinyland_prometheus` module
+  (`@tummycrypt/tinyland-prometheus` 0.2.2, the Prometheus text-format
+  registry for counters, gauges and histograms) into this package as a new
+  export (RU2/RU7). The stack is unchanged from 1.3.0 (TypeScript 7.0.2,
+  vitest 5.0.3), so this is a minor release.
+  - New subpath `./prometheus` (`@tummycrypt/tinyland-otel/prometheus`) with
+    the same API as the old package: `MetricsRegistry`, `metricsRegistry`,
+    `incrementCounter`, `setGauge`, `observeHistogram`, `exportMetrics`, and
+    the types `Metric`, `HistogramBucket` and `HistogramMetric`.
+  - The root re-exports the same names unchanged, since none of them clash
+    with the otel, analytics-data, metrics or metrics-collectors exports. The
+    root and the subpath share one `metricsRegistry` singleton, so the
+    prometheus `setGauge` can still be passed as the metrics-collectors
+    `metricsWriter`.
+  - The sources and tests are carried over byte for byte (tests change only
+    their import paths). The standalone repo and the tinyland.dev
+    `packages/tinyland-prometheus` copy had identical sources and tests.
+- No existing export was removed or renamed.
+
+### Migration
+
+- Bazel consumers of `tummycrypt_tinyland_prometheus`: drop that `bazel_dep`
+  and use `bazel_dep(name = "tummycrypt_tinyland_otel", version = "1.4.0")`.
+- Change imports from `@tummycrypt/tinyland-prometheus` to
+  `@tummycrypt/tinyland-otel/prometheus` (or the package root). No other
+  source change is needed.
+- Consumers of 1.0.0 through 1.3.0 need no change.
+
 ## 1.3.0
 
 ### Minor Changes
