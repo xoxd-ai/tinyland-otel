@@ -1,5 +1,42 @@
 # @tummycrypt/tinyland-otel
 
+## 1.1.0
+
+### Minor Changes
+
+- Merge the retired `tummycrypt_tinyland_analytics_data` module
+  (`@tummycrypt/tinyland-analytics-data` 0.2.2, the Loki-backed page view and
+  session analytics reader) into this package as a new export (RU2/RU7). The
+  stack is unchanged from 1.0.0 (TypeScript 7.0.2, vitest 5.0.3), so this is a
+  minor release.
+  - New subpath `./analytics-data` (`@tummycrypt/tinyland-otel/analytics-data`)
+    with the same API as the old package: `configure`, `getConfig`,
+    `resetConfig`, `parseTimeRange`, `AnalyticsDataService`,
+    `analyticsDataService`, `createAnalyticsDataService`, and the types
+    `PageView`, `AnalyticsMetrics`, `AnalyticsDataConfig`, `Logger` and
+    `FetchResponse`.
+  - Root aliases that do not clash with the otel names: `configureAnalyticsData`,
+    `getAnalyticsDataConfig`, `resetAnalyticsDataConfig`,
+    `parseAnalyticsTimeRange`, `AnalyticsDataService`, `analyticsDataService`,
+    `createAnalyticsDataService`, and the types `AnalyticsPageView`,
+    `AnalyticsMetrics`, `AnalyticsDataConfig`, `AnalyticsDataLogger` and
+    `AnalyticsFetchResponse`. The analytics configuration stays separate from
+    `configureOtel`.
+  - The sources and tests are carried over unchanged, with one exception:
+    `AnalyticsDataService` no longer copies `lokiUrl` and `prometheusUrl` into
+    private fields, because nothing read those fields and this package's
+    `noUnusedLocals` setting rejects them. Both settings are still required in
+    `AnalyticsDataConfig`, and behavior is unchanged.
+- No existing export was removed or renamed.
+
+### Migration
+
+- Bazel consumers of `tummycrypt_tinyland_analytics_data`: drop that
+  `bazel_dep` and use `bazel_dep(name = "tummycrypt_tinyland_otel", version = "1.1.0")`.
+- Change imports from `@tummycrypt/tinyland-analytics-data` to
+  `@tummycrypt/tinyland-otel/analytics-data`. No other source change is needed.
+- Consumers of 1.0.0 need no change.
+
 ## 1.0.0
 
 ### Major Changes
