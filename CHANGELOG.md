@@ -20,8 +20,13 @@
   - The root re-exports the same names unchanged, since none of them clash
     with the otel exports. The metrics configuration stays separate from
     `configureOtel`.
-  - The sources and tests are carried over byte for byte (tests change only
-    their import paths). The standalone repo and the tinyland.dev
+  - The sources and tests are carried over unchanged (tests change only
+    their import paths), with one fix: `MetricsCollector.categorizeReferrer`
+    now matches the known social, search and internal domains by hostname
+    (the domain itself or a subdomain) instead of by substring, so hosts such
+    as `notfacebook.com` or `facebook.com.example.net` are classed as
+    `Referral`. Exact hosts and subdomains are classed as before. New tests
+    cover both cases. The standalone repo and the tinyland.dev
     `packages/tinyland-metrics` copy had identical sources and tests.
 - No existing export was removed or renamed.
 

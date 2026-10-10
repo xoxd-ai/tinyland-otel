@@ -268,6 +268,18 @@ describe('MetricsCollector', () => {
 		it('returns Direct for invalid URLs', () => {
 			expect(collector.categorizeReferrer('not-a-url')).toBe('Direct');
 		});
+
+		it('matches subdomains of a known domain', () => {
+			expect(collector.categorizeReferrer('https://m.facebook.com/story')).toBe('Social Media');
+			expect(collector.categorizeReferrer('https://www.stonewallunderground.com/')).toBe('Internal');
+		});
+
+		it('does not match hosts that only contain a known domain as a substring', () => {
+			expect(collector.categorizeReferrer('https://notfacebook.com/')).toBe('Referral');
+			expect(collector.categorizeReferrer('https://facebook.com.example.net/')).toBe('Referral');
+			expect(collector.categorizeReferrer('https://bing.com.example.net/')).toBe('Referral');
+			expect(collector.categorizeReferrer('https://stonewallunderground.com.example.net/')).toBe('Referral');
+		});
 	});
 
 	describe('analyzeTrafficSources', () => {

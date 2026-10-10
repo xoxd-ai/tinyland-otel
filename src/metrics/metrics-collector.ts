@@ -19,6 +19,13 @@ import type {
   TrafficSource,
 } from './types.js';
 
+// Match a hostname against a registrable domain: the domain itself or any
+// subdomain of it. A plain substring test would also match unrelated hosts such
+// as "notfacebook.com" or "facebook.com.example.net".
+function isDomainOrSubdomain(hostname: string, domain: string): boolean {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
 export class MetricsCollector {
   private pageMetrics = new Map<string, PageMetrics>();
   private sessionMetrics = new Map<string, SessionMetrics>();
@@ -248,12 +255,12 @@ export class MetricsCollector {
 
       
       if (
-        domain.includes('facebook.com') ||
-        domain.includes('twitter.com') ||
-        domain.includes('instagram.com') ||
-        domain.includes('linkedin.com') ||
-        domain.includes('youtube.com') ||
-        domain.includes('tiktok.com')
+        isDomainOrSubdomain(domain, 'facebook.com') ||
+        isDomainOrSubdomain(domain, 'twitter.com') ||
+        isDomainOrSubdomain(domain, 'instagram.com') ||
+        isDomainOrSubdomain(domain, 'linkedin.com') ||
+        isDomainOrSubdomain(domain, 'youtube.com') ||
+        isDomainOrSubdomain(domain, 'tiktok.com')
       ) {
         return 'Social Media';
       }
@@ -261,16 +268,16 @@ export class MetricsCollector {
       
       if (
         domain.includes('google.') ||
-        domain.includes('bing.com') ||
-        domain.includes('yahoo.com') ||
-        domain.includes('duckduckgo.com')
+        isDomainOrSubdomain(domain, 'bing.com') ||
+        isDomainOrSubdomain(domain, 'yahoo.com') ||
+        isDomainOrSubdomain(domain, 'duckduckgo.com')
       ) {
         return 'Search';
       }
 
       
       if (
-        domain.includes('stonewallunderground.com') ||
+        isDomainOrSubdomain(domain, 'stonewallunderground.com') ||
         domain.includes('localhost')
       ) {
         return 'Internal';
