@@ -1,5 +1,41 @@
 # @tummycrypt/tinyland-otel
 
+## 1.3.0
+
+### Minor Changes
+
+- Merge the retired `tummycrypt_tinyland_metrics_collectors` module
+  (`@tummycrypt/tinyland-metrics-collectors` 0.2.2, the process, session,
+  auth, accessibility and client gauge collectors) into this package as a new
+  export (RU2/RU7). The stack is unchanged from 1.2.0 (TypeScript 7.0.2,
+  vitest 5.0.3), so this is a minor release.
+  - New subpath `./metrics-collectors`
+    (`@tummycrypt/tinyland-otel/metrics-collectors`) with the same API as the
+    old package: `configureMetricsCollectors`, `getMetricsCollectorsConfig`,
+    `resetMetricsCollectorsConfig`, `collectProcessMetrics`,
+    `collectSessionMetrics`, `collectAccessibilityMetrics`,
+    `collectAuthMetrics`, `collectClientMetrics`, `collectAllMetrics`, and the
+    types `MetricsWriter`, `AccessibilityMetricsData` and
+    `MetricsCollectorsConfig`.
+  - The root re-exports the same names unchanged, since none of them clash
+    with the otel or metrics exports. The collectors configuration stays
+    separate from `configureOtel` and `configureMetrics`.
+  - The sources and tests are carried over byte for byte (tests change only
+    their import paths). The standalone repo and the tinyland.dev
+    `packages/tinyland-metrics-collectors` copy had identical sources and
+    tests.
+- No existing export was removed or renamed.
+
+### Migration
+
+- Bazel consumers of `tummycrypt_tinyland_metrics_collectors`: drop that
+  `bazel_dep` and use
+  `bazel_dep(name = "tummycrypt_tinyland_otel", version = "1.3.0")`.
+- Change imports from `@tummycrypt/tinyland-metrics-collectors` to
+  `@tummycrypt/tinyland-otel/metrics-collectors` (or the package root). No
+  other source change is needed.
+- Consumers of 1.0.0 through 1.2.0 need no change.
+
 ## 1.2.0
 
 ### Minor Changes
