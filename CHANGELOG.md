@@ -1,5 +1,44 @@
 # @tummycrypt/tinyland-otel
 
+## 1.2.0
+
+### Minor Changes
+
+- Merge the retired `tummycrypt_tinyland_metrics` module
+  (`@tummycrypt/tinyland-metrics` 0.2.2, the in-memory page view and session
+  metrics collector and the SSE event stream manager) into this package as a
+  new export (RU2/RU7). The stack is unchanged from 1.1.0 (TypeScript 7.0.2,
+  vitest 5.0.3), so this is a minor release.
+  - New subpath `./metrics` (`@tummycrypt/tinyland-otel/metrics`) with the same
+    API as the old package: `configureMetrics`, `getMetricsConfig`,
+    `resetMetricsConfig`, `MetricsCollector`, `createMetricsCollector`,
+    `getMetricsCollector`, `resetMetricsCollectorSingleton`,
+    `EventStreamManager`, `getEventStreamManager`, and the types
+    `MetricsConfig`, `MetricsLogger`, `ResolvedMetricsConfig`, `MetricsData`,
+    `PageMetrics`, `RealtimeEvent`, `RequestDurationBuckets`,
+    `SerializedPageMetrics`, `SessionMetrics`, `TopPage` and `TrafficSource`.
+  - The root re-exports the same names unchanged, since none of them clash
+    with the otel exports. The metrics configuration stays separate from
+    `configureOtel`.
+  - The sources and tests are carried over unchanged (tests change only
+    their import paths), with one fix: `MetricsCollector.categorizeReferrer`
+    now matches the known social, search and internal domains by hostname
+    (the domain itself or a subdomain) instead of by substring, so hosts such
+    as `notfacebook.com` or `facebook.com.example.net` are classed as
+    `Referral`. Exact hosts and subdomains are classed as before. New tests
+    cover both cases. The standalone repo and the tinyland.dev
+    `packages/tinyland-metrics` copy had identical sources and tests.
+- No existing export was removed or renamed.
+
+### Migration
+
+- Bazel consumers of `tummycrypt_tinyland_metrics`: drop that `bazel_dep` and
+  use `bazel_dep(name = "tummycrypt_tinyland_otel", version = "1.2.0")`.
+- Change imports from `@tummycrypt/tinyland-metrics` to
+  `@tummycrypt/tinyland-otel/metrics` (or the package root). No other source
+  change is needed.
+- Consumers of 1.0.0 or 1.1.0 need no change.
+
 ## 1.1.0
 
 ### Minor Changes
