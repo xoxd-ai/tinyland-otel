@@ -269,3 +269,26 @@ export type {
 	TopPage,
 	TrafficSource,
 } from './metrics/index.js';
+
+
+// Process, session, auth, accessibility and client gauge collectors, merged
+// from the retired tummycrypt_tinyland_metrics_collectors module. The full,
+// unchanged API also lives at the "./metrics-collectors" subpath
+// (@tummycrypt/tinyland-otel/metrics-collectors). None of these names clash with
+// the otel or metrics exports, so the root keeps the original names.
+export {
+	configureMetricsCollectors,
+	getMetricsCollectorsConfig,
+	resetMetricsCollectorsConfig,
+	collectProcessMetrics,
+	collectSessionMetrics,
+	collectAccessibilityMetrics,
+	collectAuthMetrics,
+	collectClientMetrics,
+	collectAllMetrics,
+} from './metrics-collectors/index.js';
+export type {
+	MetricsWriter,
+	AccessibilityMetricsData,
+	MetricsCollectorsConfig,
+} from './metrics-collectors/index.js';
