@@ -255,7 +255,7 @@ export {
 	resetMetricsCollectorSingleton,
 	EventStreamManager,
 	getEventStreamManager,
-} from ./metrics/index.js;
+} from './metrics/index.js';
 export type {
 	MetricsConfig,
 	MetricsLogger,
@@ -268,4 +268,4 @@ export type {
 	SessionMetrics,
 	TopPage,
 	TrafficSource,
-} from ./metrics/index.js;
+} from './metrics/index.js';
