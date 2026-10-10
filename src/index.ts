@@ -292,3 +292,25 @@ export type {
 	AccessibilityMetricsData,
 	MetricsCollectorsConfig,
 } from './metrics-collectors/index.js';
+
+
+// Prometheus-compatible text-format registry (counters, gauges, histograms),
+// merged from the retired tummycrypt_tinyland_prometheus module. The full,
+// unchanged API also lives at the "./prometheus" subpath
+// (@tummycrypt/tinyland-otel/prometheus). None of these names clash with the
+// otel, analytics-data, metrics or metrics-collectors exports, so the root keeps
+// the original names. The root and the subpath share one metricsRegistry
+// singleton.
+export {
+	MetricsRegistry,
+	metricsRegistry,
+	incrementCounter,
+	setGauge,
+	observeHistogram,
+	exportMetrics,
+} from './prometheus/index.js';
+export type {
+	Metric,
+	HistogramBucket,
+	HistogramMetric,
+} from './prometheus/index.js';
