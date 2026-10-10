@@ -1,8 +1,8 @@
 {
   "name": "@tummycrypt/tinyland-otel",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
-  "description": "OpenTelemetry instrumentation layer: tracer factory, span helpers, TraceQL query builder, RED metrics, Tempo query service, Loki-backed analytics data, and file-based observability logging",
+  "description": "OpenTelemetry instrumentation layer: tracer factory, span helpers, TraceQL query builder, RED metrics, Tempo query service, Loki-backed analytics data, in-memory site metrics with an SSE event stream, and file-based observability logging",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,6 +15,10 @@
     "./analytics-data": {
       "types": "./dist/analytics-data/index.d.ts",
       "import": "./dist/analytics-data/index.js"
+    },
+    "./metrics": {
+      "types": "./dist/metrics/index.d.ts",
+      "import": "./dist/metrics/index.js"
     }
   },
   "files": [
@@ -41,7 +45,9 @@
     "instrumentation",
     "grafana",
     "loki",
-    "analytics"
+    "analytics",
+    "metrics",
+    "sse"
   ],
   "author": "Tinyland.dev",
   "license": "Zlib AND LicenseRef-Tinyland-Proprietary",

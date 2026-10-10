@@ -239,3 +239,33 @@ export type {
 	Logger as AnalyticsDataLogger,
 	FetchResponse as AnalyticsFetchResponse,
 } from './analytics-data/index.js';
+
+
+// In-memory site metrics collector and SSE event stream manager, merged from
+// the retired tummycrypt_tinyland_metrics module. The full, unchanged API also
+// lives at the "./metrics" subpath (@tummycrypt/tinyland-otel/metrics). None of
+// these names clash with the otel exports, so the root keeps the original names.
+export {
+	configureMetrics,
+	getMetricsConfig,
+	resetMetricsConfig,
+	MetricsCollector,
+	createMetricsCollector,
+	getMetricsCollector,
+	resetMetricsCollectorSingleton,
+	EventStreamManager,
+	getEventStreamManager,
+} from ./metrics/index.js;
+export type {
+	MetricsConfig,
+	MetricsLogger,
+	ResolvedMetricsConfig,
+	MetricsData,
+	PageMetrics,
+	RealtimeEvent,
+	RequestDurationBuckets,
+	SerializedPageMetrics,
+	SessionMetrics,
+	TopPage,
+	TrafficSource,
+} from ./metrics/index.js;
