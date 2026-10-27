@@ -1,3 +1,6 @@
+# A Bazel server exits after 120 s idle instead of the 3 h default.
+startup --max_idle_secs=120
+
 common --enable_bzlmod
 
 build --jobs=auto
@@ -14,4 +17,10 @@ build:ci --curses=no
 build:ci --noshow_loading_progress
 test:ci --test_output=errors
 
+# With a remote executor, a failed remote action fails the build
+# instead of rerunning locally.
+build --remote_local_fallback=false
+
+# GloriousFlywheel fragment, present only once the repo is enrolled.
+try-import %workspace%/.bazelrc.flywheel
 try-import %workspace%/user.bazelrc
